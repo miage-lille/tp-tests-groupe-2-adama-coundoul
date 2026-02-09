@@ -50,5 +50,17 @@ describe('Webinar Routes E2E', () => {
         expect(updatedWebinar?.seats).toBe(30);
     });
 
+    it('should return WebinarNotFoundException', async () => {
+        const server = fixture.getServer();
+
+        const response = await supertest(server)
+            .post('/webinars/nonexistent/seats')
+            .send({ seats: '30' })
+            .expect(404);
+        expect(response.body).toEqual({
+            error: 'Webinar not found'
+        });
+    });
+
 
 });
