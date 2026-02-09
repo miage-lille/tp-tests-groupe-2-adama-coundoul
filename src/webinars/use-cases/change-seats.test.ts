@@ -5,6 +5,7 @@ import { InMemoryWebinarRepository } from "../adapters/webinar-repository.in-mem
 import { Webinar } from "../entities/webinar.entity";
 import { ChangeSeats } from "./change-seats";
 import { WebinarNotFoundException } from "../exceptions/webinar-not-found";
+import { WebinarNotOrganizerException } from "../exceptions/webinar-not-organizer";
 
 
 describe('Feature : Change seats', () => {
@@ -55,6 +56,22 @@ describe('Feature : Change seats', () => {
       expect(webinar?.props.seats).toEqual(100);
     });
   });
+
+  describe('Scenario: update the webinar of someone else', () => {
+    const payload = {
+      user: testUser.bob,
+      webinarId: 'webinar-id',
+      seats: 200,
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotOrganizerException);
+
+      const webinar = await webinarRepository.findById('webinar-id');
+      expect(webinar?.props.seats).toEqual(100);
+    });
+  });
+
 
 
 });
