@@ -6,6 +6,7 @@ import { Webinar } from "../entities/webinar.entity";
 import { ChangeSeats } from "./change-seats";
 import { WebinarNotFoundException } from "../exceptions/webinar-not-found";
 import { WebinarNotOrganizerException } from "../exceptions/webinar-not-organizer";
+import { WebinarReduceSeatsException } from "../exceptions/webinar-reduce-seats";
 
 
 describe('Feature : Change seats', () => {
@@ -66,6 +67,21 @@ describe('Feature : Change seats', () => {
 
     it('should fail', async () => {
       await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotOrganizerException);
+
+      const webinar = await webinarRepository.findById('webinar-id');
+      expect(webinar?.props.seats).toEqual(100);
+    });
+  });
+
+  describe('Scenario: change seat to an inferior number', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 50,
+    };
+
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(WebinarReduceSeatsException);
 
       const webinar = await webinarRepository.findById('webinar-id');
       expect(webinar?.props.seats).toEqual(100);
