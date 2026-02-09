@@ -7,6 +7,7 @@ import { ChangeSeats } from "./change-seats";
 import { WebinarNotFoundException } from "../exceptions/webinar-not-found";
 import { WebinarNotOrganizerException } from "../exceptions/webinar-not-organizer";
 import { WebinarReduceSeatsException } from "../exceptions/webinar-reduce-seats";
+import { WebinarTooManySeatsException } from "../exceptions/webinar-too-many-seats";
 
 
 describe('Feature : Change seats', () => {
@@ -88,6 +89,19 @@ describe('Feature : Change seats', () => {
     });
   });
 
+  describe('Scenario: change seat to a number > 1000', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 1001,
+    };
 
+    it('should fail', async () => {
+      await expect(useCase.execute(payload)).rejects.toThrow(WebinarTooManySeatsException);
+
+      const webinar = await webinarRepository.findById('webinar-id');
+      expect(webinar?.props.seats).toEqual(100);
+    });
+  });
 
 });
