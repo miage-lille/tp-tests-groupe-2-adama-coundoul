@@ -62,5 +62,34 @@ describe('Webinar Routes E2E', () => {
         });
     });
 
+    it('should return WebinarNotOrganizerException', async () => {
+        const prisma = fixture.getPrismaClient();
+        const server = fixture.getServer();
+
+        // ARRANGE 
+        await prisma.webinar.create({
+            data: {
+                id: 'other-webinar',
+                title: 'Other Webinar',
+                seats: 10,
+                startDate: new Date(),
+                endDate: new Date(),
+                organizerId: 'other-user',
+            },
+        });
+
+        // ACT
+        const response = await supertest(server)
+            .post('/webinars/other-webinar/seats')
+            .send({ seats: '30' })
+            .expect(401);
+
+        // ASSERT
+        expect(response.body).toEqual({
+            error: 'User is not allowed to update this webinar'
+        });
+    });
+
+
 
 });
